@@ -1,0 +1,22 @@
+/var/www/my-app/application/logs/*.log {
+    daily
+    maxsize 50M
+    missingok
+    rotate 7
+    compress
+    delaycompress
+    notifempty
+    create 660 appuser www-data
+    sharedscripts
+    dateext
+    dateformat -web01-%Y-%m-%d-%s
+    postrotate
+        /etc/init.d/apache2 reload > /dev/null
+        /usr/bin/s3cmd sync /var/www/my-app/application/logs/*.gz s3://app_logs
+    endscript
+    prerotate
+        if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+            run-parts /etc/logrotate.d/httpd-prerotate; \
+        fi; \
+    endscript
+}
